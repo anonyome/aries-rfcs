@@ -1,4 +1,4 @@
-# Aries RFC 0880: SD-JWT signed W3C Credential (vc+sd-jwt) Attachment format for requesting and issuing credentials
+# Aries RFC 0881: SD-JWT signed W3C Credential (vc+sd-jwt) Attachment format for requesting and issuing credentials
 
 - Authors: George Mulhearn (Anonyome Labs)
 - Status: [PROPOSED](/README.md#proposed)
