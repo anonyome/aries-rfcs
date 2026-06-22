@@ -189,7 +189,7 @@ It is up to the issuer to decide which claims are selectively disclosable. If `b
 
 The attachment format supports different methods to bind the credential to the receiver of the credential. In the offer message the issuer can indicate which binding methods are supported in the `binding_method` object. Each key represents the id of the supported binding method.
 
-This section defines a set of binding methods supported by this attachment format, but other binding methods may be used.
+This section defines a set of binding methods supported by this attachment format, but other binding methods may be used. Based on the binding method, the request needs to include a `binding_proof` object where the key matches the key of the binding method from the offer.
 
 #### DIDComm Signed Attachment
 
@@ -246,7 +246,7 @@ The attachment MUST be signed by including a signature in the `jws` field of the
 ```json
 {
   "alg": "ES256",
-  "kid": "did:key:z6MkkwiqX7BvkBbi37aNx2vJkCEYSKgHd2Jcgh4AUhi4YY1u#z6MkkwiqX7BvkBbi37aNx2vJkCEYSKgHd2Jcgh4AUhi4YY1u"
+  "kid": "did:key:zDnaerDaTF5BXEavCrfRZEk316dpbLsfPDZ3WJ5hRTPFU2169#zDnaerDaTF5BXEavCrfRZEk316dpbLsfPDZ3WJ5hRTPFU2169"
 }
 ```
 
