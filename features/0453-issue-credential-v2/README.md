@@ -179,7 +179,6 @@ DIF Credential Manifest | `dif/credential-manifest@v1.0` | [`propose-credential`
 Linked Data Proof VC Detail  | `aries/ld-proof-vc-detail@v1.0` | [`ld-proof-vc-detail` attachment format](../0593-json-ld-cred-attach/README.md#ld-proof-vc-detail-attachment-format) | |
 Hyperledger Indy Credential Filter | `hlindy/cred-filter@v2.0` | [`cred filter` format](../0592-indy-attachments/README.md#cred-filter-format)| |
 Hyperledger AnonCreds Credential Filter | `anoncreds/credential-filter@v1.0` | [`Credential Filter` format](../0771-anoncreds-attachments/README.md#credential-filter-format)| |
-W3C SD-JWT VC Detail  | `didcomm/vc+sd-jwt-detail@v1.0` | [`vc+sd-jwt-detail` attachment format](../0881-vc-sd-jwt-cred-attach/README.md#vcsd-jwt-detail-attachment-format) | |
 
 #### Offer Credential
 
@@ -233,7 +232,7 @@ Hyperledger Indy Credential Abstract | `hlindy/cred-abstract@v2.0` | [`cred abst
 Linked Data Proof VC Detail  | `aries/ld-proof-vc-detail@v1.0` | [`ld-proof-vc-detail` attachment format](../0593-json-ld-cred-attach/README.md#ld-proof-vc-detail-attachment-format) |
 Hyperledger AnonCreds Credential Offer | `anoncreds/credential-offer@v1.0` | [`Credential Offer` format](../0771-anoncreds-attachments/README.md#credential-offer-format)|
 W3C VC - Data Integrity Proof Credential Offer | `didcomm/w3c-di-vc-offer@v0.1` | [`Credential Offer` format](../0809-w3c-data-integrity-credential-attachment/README.md#credential-offer-attachment-format)|
-W3C SD-JWT VC Detail  | `didcomm/vc+sd-jwt-detail@v1.0` | [`vc+sd-jwt-detail` attachment format](../0881-vc-sd-jwt-cred-attach/README.md#vcsd-jwt-detail-attachment-format) | |
+W3C SD-JWT VC Offer | `didcomm/vc+sd-jwt-offer@v1.0` | [`Credential Offer` format](../0881-vc-sd-jwt-cred-attach/README.md#credential-offer-attachment-format) | |
 
 #### Request Credential
 
@@ -281,7 +280,7 @@ Hyperledger Indy Credential Request | `hlindy/cred-req@v2.0` | [`cred request` f
 Linked Data Proof VC Detail  | `aries/ld-proof-vc-detail@v1.0` | [`ld-proof-vc-detail` attachment format](../0593-json-ld-cred-attach/README.md#ld-proof-vc-detail-attachment-format) |
 Hyperledger AnonCreds Credential Request | `anoncreds/credential-request@v1.0` | [`Credential Request` format](../0771-anoncreds-attachments/README.md#credential-request-format)|
 W3C VC - Data Integrity Proof Credential Request | `didcomm/w3c-di-vc-request@v0.1` | [`Credential Request` format](../0809-w3c-data-integrity-credential-attachment/README.md#credential-request-attachment-format)|
-W3C SD-JWT VC Detail  | `didcomm/vc+sd-jwt-detail@v1.0` | [`vc+sd-jwt-detail` attachment format](../0881-vc-sd-jwt-cred-attach/README.md#vcsd-jwt-detail-attachment-format) | |
+W3C SD-JWT VC Request | `didcomm/vc+sd-jwt-request@v1.0` | [`Credential Request` format](../0881-vc-sd-jwt-cred-attach/README.md#credential-request-attachment-format) | |
 
 #### Issue Credential
 
@@ -330,7 +329,7 @@ Linked Data Proof VC  | `aries/ld-proof-vc@v1.0` | [`ld-proof-vc` attachment for
 Hyperledger Indy Credential | `hlindy/cred@v2.0` | [credential format](../0592-indy-attachments/README.md#credential-format)|
 Hyperledger AnonCreds Credential| `anoncreds/credential@v1.0` | [`Credential` format](../0771-anoncreds-attachments/README.md#credential-format)|
 W3C VC - Data Integrity Proof Credential | `didcomm/w3c-di-vc@v0.1` | [`Credential` format](../0809-w3c-data-integrity-credential-attachment/README.md#credential-attachment-format)|
-W3C SD-JWT VC  | `didcomm/vc+sd-jwt@v1.0` | [`vc+sd-jwt` attachment format](../0881-vc-sd-jwt-cred-attach/README.md#vcsd-jwt-attachment-format) | |
+W3C SD-JWT VC  | `didcomm/vc+sd-jwt@v1.0` | [`Credential` format](../0881-vc-sd-jwt-cred-attach/README.md#credential-attachment-format) | |
 
 #### Adopted Problem Report
 

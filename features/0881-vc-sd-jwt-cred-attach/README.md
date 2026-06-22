@@ -1,4 +1,4 @@
-# Aries RFC 0881: SD-JWT signed W3C Credential (vc+sd-jwt) Attachment format for requesting and issuing credentials
+# Aries RFC 0881: SD-JWT Verifiable Credential Attachment format for requesting and issuing credentials
 
 - Authors: George Mulhearn (Anonyome Labs)
 - Status: [PROPOSED](/README.md#proposed)
@@ -9,13 +9,11 @@
 
 ## Summary
 
-This RFC registers an attachment format for use in the [issue-credential V2](../0453-issue-credential-v2/README.md) protocol based on W3C credentials with [SD-JWT signatures](https://www.w3.org/TR/vc-jose-cose/#with-sd-jwt) from the [VC Data Model 2.0](https://www.w3.org/TR/vc-data-model-2.0/).
-
-It defines a minimal set of parameters needed to create a common understanding of the verifiable credential to issue. It is based on version [2.0 of the Verifiable Credentials Data Model](https://www.w3.org/TR/vc-data-model-2.0/) which is a W3C recommendation since 15 May 2025.
+This RFC registers an attachment format for use in the [issue-credential V2](../0453-issue-credential-v2/README.md) protocol based on W3C Verifiable Credentials with [SD-JWT](https://www.w3.org/TR/vc-jose-cose/#with-sd-jwt) securing mechanism from the [VC Data Model 2.0](https://www.w3.org/TR/vc-data-model-2.0/).
 
 ## Motivation
 
-The Issue Credential protocol needs an attachment format to be able to exchange W3C credentials with SD-JWT signatures.
+The Issue Credential protocol needs an attachment format to be able to exchange W3C credentials secured with SD-JWT. SD-JWT enables selective disclosure of claims, allowing holders to present only the claims they choose to share with a verifier. The `vc+sd-jwt` media type is defined in the [W3C VC-JOSE-COSE](https://www.w3.org/TR/vc-jose-cose/) specification targeting VC Data Model 2.0.
 
 ## Tutorial
 
@@ -23,50 +21,106 @@ Complete examples of messages are provided in the [reference section](#reference
 
 ## Reference
 
-### `vc+sd-jwt-detail` attachment format
+### Credential Offer Attachment Format
 
-Format identifier: `didcomm/vc+sd-jwt-detail@v1.0`
+Format identifier: `didcomm/vc+sd-jwt-offer@v1.0`
 
-This format is used to formally propose, offer, or request a credential. The `credential` property should contain the credential as it is going to be issued, without any `proof` or `credentialStatus` properties. `options` is reserved for future usage.
-
-The JSON structure might look like this:
+This format is used to offer a credential to a potential holder. The JSON structure might look like this:
 
 ```json
 {
+  "binding_required": true,
+  "binding_method": {
+    "didcomm_signed_attachment": {
+      "algs_supported": ["ES256", "EdDSA"],
+      "did_methods_supported": ["key", "jwk"],
+      "nonce": "b19439b0-4dc9-4c28-b796-99d17034fb5c"
+    }
+  },
   "credential": {
     "@context": [
       "https://www.w3.org/ns/credentials/v2",
       "https://www.w3.org/ns/credentials/examples/v2"
     ],
-    "id": "urn:uuid:3978344f-8596-4c3a-a978-8fcaba3903c5",
     "type": ["VerifiableCredential", "UniversityDegreeCredential"],
     "issuer": "did:key:z6MkodKV3mnjQQMB9jhMZtKD9Sm75ajiYq51JDLuRSPZTXrr",
     "validFrom": "2020-01-01T19:23:24Z",
     "validUntil": "2021-01-01T19:23:24Z",
     "credentialSubject": {
-      "id": "did:key:z6MkpTHR8VNsBxYAAWHut2Geadd9jSwuBV8xRoAnwWsdvktH",
       "degree": {
         "type": "BachelorDegree",
         "name": "Bachelor of Science and Arts"
       }
     }
-  },
-  "options": {
   }
 }
 ```
 
-A complete [`request credential` message form the Issue Credential protocol 2.0](../0453-issue-credential-v2/README.md#request-credential) might look like this:
+A complete [`offer-credential` message from the Issue Credential protocol 2.0](../0453-issue-credential-v2/README.md#offer-credential) might look like this:
 
-```jsonc
+```json
+{
+  "@id": "284d3996-ba85-45d9-964b-9fd5805517b6",
+  "@type": "https://didcomm.org/issue-credential/2.0/offer-credential",
+  "comment": "<some comment>",
+  "formats": [
+    {
+      "attach_id": "5b38af88-d36f-4f77-bb7a-2f04ab806eb8",
+      "format": "didcomm/vc+sd-jwt-offer@v1.0"
+    }
+  ],
+  "offers~attach": [
+    {
+      "@id": "5b38af88-d36f-4f77-bb7a-2f04ab806eb8",
+      "mime-type": "application/json",
+      "data": {
+        "base64": "ewogICJiaW5kaW5nX3JlcXVpcmVkIjogdHJ1ZSwK...(clipped)...fQp9"
+      }
+    }
+  ]
+}
+```
+
+- `binding_required` - Optional. Boolean indicating whether the credential MUST be bound to the holder. If omitted, the credential is not required to be bound to the holder. If set to `true`, the credential MUST be bound to the holder using at least one of the binding methods defined in `binding_method`.
+- `binding_method` - Required if `binding_required` is `true`. Object containing key-value pairs of binding methods supported by the issuer to bind the credential to a holder. See [Binding Methods](#binding-methods) for a registry of default binding methods supported as part of this RFC.
+- `credential` - Required. The credential to be issued. The credential MUST conform to VC Data Model 2.0. The credential MUST NOT contain any proofs. Some properties MAY be omitted if they will only be available at time of issuance, such as `validFrom`, `issuer`, `credentialSubject.id`, `credentialStatus`.
+
+#### Credential Offer Exceptions
+
+To allow for validation of the `credential` in the offer, the `credential` MUST be conformant to the VC Data Model 2.0, except for the following exceptions:
+
+- `validFrom` can be omitted, or set to a placeholder value.
+- `issuer` (or `issuer.id` if issuer is an object) can be omitted.
+- `credentialSubject.id` can be omitted.
+- `credentialStatus` can be omitted entirely, or `credentialStatus.type` can be present with other dynamic fields omitted.
+
+### Credential Request Attachment Format
+
+Format identifier: `didcomm/vc+sd-jwt-request@v1.0`
+
+This format is used to request issuance of a credential. The JSON structure might look like this:
+
+```json
+{
+  "binding_proof": {
+    "didcomm_signed_attachment": {
+      "attachment_id": "attachment-0"
+    }
+  }
+}
+```
+
+A complete [`request-credential` message from the Issue Credential protocol 2.0](../0453-issue-credential-v2/README.md#request-credential) might look like this:
+
+```json
 {
   "@id": "7293daf0-ed47-4295-8cc4-5beb513e500f",
-  "@type": "https://didcomm.org/issue-credential/%VER/request-credential",
+  "@type": "https://didcomm.org/issue-credential/2.0/request-credential",
   "comment": "<some comment>",
   "formats": [
     {
       "attach_id": "13a3f100-38ce-4e96-96b4-ea8f30250df9",
-      "format": "didcomm/vc+sd-jwt-detail@v1.0"
+      "format": "didcomm/vc+sd-jwt-request@v1.0"
     }
   ],
   "requests~attach": [
@@ -74,44 +128,40 @@ A complete [`request credential` message form the Issue Credential protocol 2.0]
       "@id": "13a3f100-38ce-4e96-96b4-ea8f30250df9",
       "mime-type": "application/json",
       "data": {
-        "base64": "ewogICJjcmVkZW50aWFsIjogewogICAgIkBjb250...(clipped)...IkVkMjU1MTlTaWduYXR1cmUyMDE4IgogIH0KfQ=="
+        "base64": "ewogICJiaW5kaW5nX3Byb29mIjogewogICAgImRpZGNvbW1fc2lnbmVkX2F0dGFjaG1lbnQiOiB7CiAgICAgICJhdHRhY2htZW50X2lkIjogImF0dGFjaG1lbnQtMCIKICAgIH0KICB9Cn0="
+      }
+    }
+  ],
+  "~attach": [
+    {
+      "@id": "attachment-0",
+      "mime-type": "application/json",
+      "data": {
+        "base64": "<base64-encoded-json-attachment-content>",
+        "jws": {
+          "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6ImRpZDprZXk6... (bytes omitted)",
+          "signature": "3dZWsuru7QAVFUCtTd0s7uc1peYEijx4eyt5... (bytes omitted)"
+        }
       }
     }
   ]
 }
 ```
 
-- `credential` - Required. Detail of the W3C Credential that will be issued. Properties MUST align with the [Verifiable Credentials Data Model](https://www.w3.org/TR/vc-data-model) (1.1 or 2.0). This also means all properties required by the data model MUST be present. The properties listed below are formally supported, but additional properties MAY be included if it conforms with the data model.
+- `binding_proof` - Required if `binding_required` is `true` in the offer. Object containing key-value pairs of proofs for the binding to the holder. The keys MUST match keys of the `binding_method` object from the offer. See [Binding Methods](#binding-methods) for a registry of default binding methods supported as part of this RFC.
 
-  - `@context`
-  - `id`
-  - `type`
-  - `issuer`
-  - `issuanceDate` / `validFrom`
-  - `expirationDate` / `validUntil`
-  - `credentialSubject`
-
-- `options` - Required. Options for specifying how the VC is created/signed.
-
-
-### `vc+sd-jwt` attachment format
+### Credential Attachment Format
 
 Format identifier: `didcomm/vc+sd-jwt@v1.0`
 
-This format is used to transmit a verifiable credential with SD-JWT securing mechanism (vc+sd-jwt). The contents of the attachment is an SD-JWT.
-
-The JSON structure might look like this:
-
-```json
-"ey...(clipped)...~"
-```
+This format is used to transmit a verifiable credential with SD-JWT securing mechanism. The contents of the attachment is an SD-JWT string in compact serialization.
 
 A complete [`issue-credential` message from the Issue Credential protocol 2.0](../0453-issue-credential-v2/README.md#issue-credential) might look like this:
 
 ```json
 {
   "@id": "284d3996-ba85-45d9-964b-9fd5805517b6",
-  "@type": "https://didcomm.org/issue-credential/%VER/issue-credential",
+  "@type": "https://didcomm.org/issue-credential/2.0/issue-credential",
   "comment": "<some comment>",
   "formats": [
     {
@@ -122,30 +172,113 @@ A complete [`issue-credential` message from the Issue Credential protocol 2.0](.
   "credentials~attach": [
     {
       "@id": "5b38af88-d36f-4f77-bb7a-2f04ab806eb8",
-      "mime-type": "application/ld+json",
+      "mime-type": "application/vc+sd-jwt",
       "data": {
-        "json": "ey...(clipped)...~"
+        "json": "eyJhbGciOiJFUzI1NiJ9.eyJfc2QiOi...(clipped)...~"
       }
     }
   ]
 }
 ```
 
+- The attachment data MUST contain the SD-JWT in compact serialization format. The credential MUST conform to the VC Data Model 2.0 and use the `application/vc+sd-jwt` media type as defined in [W3C VC-JOSE-COSE](https://www.w3.org/TR/vc-jose-cose/).
+
+It is up to the issuer to decide which claims are selectively disclosable. If `binding_required` was `true` in the offer, the issued SD-JWT MUST include a `cnf` (confirmation) claim bound to the holder's key as provided through the binding proof.
+
+### Binding Methods
+
+The attachment format supports different methods to bind the credential to the receiver of the credential. In the offer message the issuer can indicate which binding methods are supported in the `binding_method` object. Each key represents the id of the supported binding method.
+
+This section defines a set of binding methods supported by this attachment format, but other binding methods may be used.
+
+#### DIDComm Signed Attachment
+
+Identifier: `didcomm_signed_attachment`
+
+This binding method leverages [DIDComm signed attachments](../../concepts/0017-attachments/README.md#signing-attachments) to bind a credential to a specific key and/or identifier.
+
+##### Binding Method in Offer
+
+```json
+{
+  "didcomm_signed_attachment": {
+    "algs_supported": ["ES256", "EdDSA"],
+    "did_methods_supported": ["key", "jwk"],
+    "nonce": "b19439b0-4dc9-4c28-b796-99d17034fb5c"
+  }
+}
+```
+
+- `algs_supported` - Required. List of strings indicating the JSON Web Algorithms supported by the issuer for verifying the signed attachment. The list MUST contain at least one value. The values MUST be a valid algorithm identifier as defined in the [JSON Web Signature and Encryption Algorithms](https://www.iana.org/assignments/jose/jose.xhtml#web-signature-encryption-algorithms) registry.
+- `did_methods_supported` - Required. List of strings indicating which DID methods are supported by the issuer for binding the credential to the holder. The list MUST contain at least one value. Values should ONLY include the method identifier of the DID method (e.g. `key`, `jwk`, `web`).
+- `nonce` - Required. Nonce to be used in the request to prevent replay attacks of the signed attachment.
+
+##### Binding Proof in Request
+
+The binding proof in the request points to an appended attachment containing the signed attachment.
+
+```json
+{
+  "didcomm_signed_attachment": {
+    "attachment_id": "<@id of the attachment>"
+  }
+}
+```
+
+- `attachment_id` - Required. The id of the appended attachment included in the request message that contains the signed attachment.
+
+###### Signed Attachment Content
+
+The attachment MUST be signed by including a signature in the `jws` field of the attachment. The data MUST be a JSON document encoded in the `base64` field of the attachment.
+
+**JWS Payload:**
+
+```json
+{
+  "nonce": "<nonce from the offer binding_method>"
+}
+```
+
+- `nonce` - Required. The `nonce` from the `didcomm_signed_attachment` object within `binding_method` from the credential offer.
+
+**Protected Header:**
+
+```json
+{
+  "alg": "ES256",
+  "kid": "did:key:z6MkkwiqX7BvkBbi37aNx2vJkCEYSKgHd2Jcgh4AUhi4YY1u#z6MkkwiqX7BvkBbi37aNx2vJkCEYSKgHd2Jcgh4AUhi4YY1u"
+}
+```
+
+- `alg` - Required. A digital signature algorithm identifier as per IANA "JSON Web Signature and Encryption Algorithms" registry. MUST NOT be `none` or an identifier for a symmetric algorithm (MAC). MUST match one of the `algs_supported` entries from the offer `binding_method` object.
+- `kid` - Required. JOSE Header containing the DID URL pointing to a specific key in a DID document. The DID method of the DID URL MUST match one of the `did_methods_supported` from the offer `binding_method` object.
+
+##### Binding in Credential
+
+The issued SD-JWT MUST include a `cnf` (confirmation) claim containing the holder's public key material, enabling SD-JWT Key Binding as defined in [SD-JWT-based Verifiable Credentials](https://datatracker.ietf.org/doc/draft-ietf-oauth-sd-jwt-vc/).
+
 ## Drawbacks
 
-N/A
+- There is currently no attachment format defined for a credential proposal. This makes it impossible for a holder to initiate the issuance of a credential using this attachment format.
+- There is no mechanism for the issuer to communicate which claims will be selectively disclosable ahead of issuance.
+- This RFC only covers issuance. A separate attachment format is needed for presenting SD-JWT credentials via [Present Proof v2 (RFC 0454)](../0454-present-proof-v2/README.md).
 
 ## Rationale and alternatives
 
-- The `hlindy-zkp-v1.0` format is an alternative restricted to the Hyperledger Indy network. The `dif/credential-manifest@v1.0` allows to issue JSON-LD credentials but is not ready yet for usage.
+- [RFC 0593: JSON-LD Credential Attachment](../0593-json-ld-cred-attach/README.md) supports Linked Data Proof credentials but does not support SD-JWT.
+- [RFC 0809: W3C Data Integrity Credential Attachment](../0809-w3c-data-integrity-credential-attachment/README.md) supports Data Integrity proofs and served as the structural basis for this RFC.
+- The `hlindy-zkp-v1.0` format is restricted to the Hyperledger Indy network.
+- [OpenID for Verifiable Credential Issuance](https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html) provides SD-JWT credential issuance but is not a DIDComm-based protocol.
 
 ## Prior art
 
-N/A
+This attachment format is structurally based on [RFC 0809: W3C Data Integrity Credential Attachment](../0809-w3c-data-integrity-credential-attachment/README.md), adapted for the SD-JWT securing mechanism.
 
 ## Unresolved questions
 
-N/A
+- Should the issuer communicate which claims will be selectively disclosable in the offer?
+- Should the holder be able to request specific claims as selectively disclosable?
+- Should the `cnf` binding format used (i.e. `jwk` vs `kid` key binding of the holder DID's VM) be negotiable? (currently at the issuer's discretion)
 
 ## Implementations
 
