@@ -154,7 +154,13 @@ A complete [`request-credential` message from the Issue Credential protocol 2.0]
 
 Format identifier: `didcomm/vc+sd-jwt@v1.0`
 
-This format is used to transmit a verifiable credential with SD-JWT securing mechanism. The contents of the attachment is an SD-JWT string in compact serialization.
+This format is used to transmit a verifiable credential with SD-JWT securing mechanism. The JSON structure might look like this:
+
+```json
+{
+  "credential": "eyJhbGciOiJFUzI1NiJ9.eyJfc2QiOi...(clipped)...~"
+}
+```
 
 A complete [`issue-credential` message from the Issue Credential protocol 2.0](../0453-issue-credential-v2/README.md#issue-credential) might look like this:
 
@@ -172,16 +178,18 @@ A complete [`issue-credential` message from the Issue Credential protocol 2.0](.
   "credentials~attach": [
     {
       "@id": "5b38af88-d36f-4f77-bb7a-2f04ab806eb8",
-      "mime-type": "application/vc+sd-jwt",
+      "mime-type": "application/json",
       "data": {
-        "json": "eyJhbGciOiJFUzI1NiJ9.eyJfc2QiOi...(clipped)...~"
+        "json": {
+          "credential": "eyJhbGciOiJFUzI1NiJ9.eyJfc2QiOi...(clipped)...~"
+        }
       }
     }
   ]
 }
 ```
 
-- The attachment data MUST contain the SD-JWT in compact serialization format. The credential MUST conform to the VC Data Model 2.0 and use the `application/vc+sd-jwt` media type as defined in [W3C VC-JOSE-COSE](https://www.w3.org/TR/vc-jose-cose/).
+- `credential` - Required. The SD-JWT in compact serialization format. The credential MUST conform to the VC Data Model 2.0 and use the `application/vc+sd-jwt` media type as defined in [W3C VC-JOSE-COSE](https://www.w3.org/TR/vc-jose-cose/).
 
 It is up to the issuer to decide which claims are selectively disclosable. If `binding_required` was `true` in the offer, the issued SD-JWT MUST include a `cnf` (confirmation) claim bound to the holder's key as provided through the binding proof.
 
