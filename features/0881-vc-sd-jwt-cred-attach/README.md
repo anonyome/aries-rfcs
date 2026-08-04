@@ -37,6 +37,10 @@ This format is used to offer a credential to a potential holder. The JSON struct
       "nonce": "b19439b0-4dc9-4c28-b796-99d17034fb5c"
     }
   },
+  "selectively_disclosable_claims": [
+    "$.credentialSubject.degree.name",
+    "$.credentialSubject.degree.type"
+  ],
   "credential": {
     "@context": [
       "https://www.w3.org/ns/credentials/v2",
@@ -83,6 +87,7 @@ A complete [`offer-credential` message from the Issue Credential protocol 2.0](.
 
 - `binding_required` - Optional. Boolean indicating whether the credential MUST be bound to the holder. If omitted, the credential is not required to be bound to the holder. If set to `true`, the credential MUST be bound to the holder using at least one of the binding methods defined in `binding_method`.
 - `binding_method` - Required if `binding_required` is `true`. Object containing key-value pairs of binding methods supported by the issuer to bind the credential to a holder. See [Binding Methods](#binding-methods) for a registry of default binding methods supported as part of this RFC.
+- `selectively_disclosable_claims` - Optional. Array of strings indicating which claims in the issued credential will be selectively disclosable. Each string is a [JSONPath](https://www.rfc-editor.org/rfc/rfc9535) expression that points to a single, unambiguous location within the `credential` object (e.g. `$.credentialSubject.degree.name`). Only dot-notation member accessors and array indices (e.g. `$.credentialSubject.addresses[0].street`) are permitted — wildcards, filters, array slices, and recursive descent MUST NOT be used. If omitted, the issuer does not communicate which claims will be selectively disclosable ahead of issuance.
 - `credential` - Required. The credential to be issued. The credential MUST conform to VC Data Model 2.0. The credential MUST NOT contain any proofs. Some properties MAY be omitted if they will only be available at time of issuance, such as `validFrom`, `issuer`, `credentialSubject.id`, `credentialStatus`.
 
 #### Credential Offer Exceptions
@@ -191,7 +196,7 @@ A complete [`issue-credential` message from the Issue Credential protocol 2.0](.
 
 - `credential` - Required. The SD-JWT in compact serialization format. The credential MUST conform to the VC Data Model 2.0 and use the `application/w3c-vc-sd-jwt` media type as defined in [W3C VC-JOSE-COSE](https://www.w3.org/TR/vc-jose-cose/).
 
-It is up to the issuer to decide which claims are selectively disclosable. If `binding_required` was `true` in the offer, the issued SD-JWT MUST include a `cnf` (confirmation) claim bound to the holder's key as provided through the binding proof.
+It is up to the issuer to decide which claims are selectively disclosable. If `selectively_disclosable_claims` was provided in the offer, the issued SD-JWT MUST make at least those claims selectively disclosable. If `binding_required` was `true` in the offer, the issued SD-JWT MUST include a `cnf` (confirmation) claim bound to the holder's key as provided through the binding proof.
 
 ### Binding Methods
 
@@ -268,7 +273,6 @@ The issued SD-JWT MUST include a `cnf` (confirmation) claim containing the holde
 ## Drawbacks
 
 - There is currently no attachment format defined for a credential proposal. This makes it impossible for a holder to initiate the issuance of a credential using this attachment format.
-- There is no mechanism for the issuer to communicate which claims will be selectively disclosable ahead of issuance.
 - This RFC only covers issuance. A separate attachment format is needed for presenting SD-JWT credentials via [Present Proof v2 (RFC 0454)](../0454-present-proof-v2/README.md).
 
 ## Rationale and alternatives
@@ -284,8 +288,7 @@ This attachment format is structurally based on [RFC 0809: W3C Data Integrity Cr
 
 ## Unresolved questions
 
-- Should the issuer communicate which claims will be selectively disclosable in the offer?
-- Should the holder be able to request specific claims as selectively disclosable?
+- Should the holder be able to propose specific claims as selectively disclosable?
 - Should the `cnf` binding format used (i.e. `jwk` vs `kid` key binding of the holder DID's VM) be negotiable? (currently at the issuer's discretion)
 
 ## Implementations
