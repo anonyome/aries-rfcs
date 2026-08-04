@@ -1,4 +1,4 @@
-# Aries RFC 0881: SD-JWT Verifiable Credential Attachment format for requesting and issuing credentials
+# Aries RFC 0881: W3C SD-JWT Verifiable Credential (`vc+sd-jwt`) Attachment format for requesting and issuing credentials
 
 - Authors: George Mulhearn (Anonyome Labs)
 - Status: [PROPOSED](/README.md#proposed)
@@ -23,7 +23,7 @@ Complete examples of messages are provided in the [reference section](#reference
 
 ### Credential Offer Attachment Format
 
-Format identifier: `didcomm/vc+sd-jwt-offer@v1.0`
+Format identifier: `didcomm/w3c-vc-sd-jwt-offer@v1.0`
 
 This format is used to offer a credential to a potential holder. The JSON structure might look like this:
 
@@ -66,7 +66,7 @@ A complete [`offer-credential` message from the Issue Credential protocol 2.0](.
   "formats": [
     {
       "attach_id": "5b38af88-d36f-4f77-bb7a-2f04ab806eb8",
-      "format": "didcomm/vc+sd-jwt-offer@v1.0"
+      "format": "didcomm/w3c-vc-sd-jwt-offer@v1.0"
     }
   ],
   "offers~attach": [
@@ -96,7 +96,7 @@ To allow for validation of the `credential` in the offer, the `credential` MUST 
 
 ### Credential Request Attachment Format
 
-Format identifier: `didcomm/vc+sd-jwt-request@v1.0`
+Format identifier: `didcomm/w3c-vc-sd-jwt-request@v1.0`
 
 This format is used to request issuance of a credential. The JSON structure might look like this:
 
@@ -120,7 +120,7 @@ A complete [`request-credential` message from the Issue Credential protocol 2.0]
   "formats": [
     {
       "attach_id": "13a3f100-38ce-4e96-96b4-ea8f30250df9",
-      "format": "didcomm/vc+sd-jwt-request@v1.0"
+      "format": "didcomm/w3c-vc-sd-jwt-request@v1.0"
     }
   ],
   "requests~attach": [
@@ -152,7 +152,7 @@ A complete [`request-credential` message from the Issue Credential protocol 2.0]
 
 ### Credential Attachment Format
 
-Format identifier: `didcomm/vc+sd-jwt@v1.0`
+Format identifier: `didcomm/w3c-vc-sd-jwt@v1.0`
 
 This format is used to transmit a verifiable credential with SD-JWT securing mechanism. The JSON structure might look like this:
 
@@ -172,7 +172,7 @@ A complete [`issue-credential` message from the Issue Credential protocol 2.0](.
   "formats": [
     {
       "attach_id": "5b38af88-d36f-4f77-bb7a-2f04ab806eb8",
-      "format": "didcomm/vc+sd-jwt@v1.0"
+      "format": "didcomm/w3c-vc-sd-jwt@v1.0"
     }
   ],
   "credentials~attach": [
@@ -189,7 +189,7 @@ A complete [`issue-credential` message from the Issue Credential protocol 2.0](.
 }
 ```
 
-- `credential` - Required. The SD-JWT in compact serialization format. The credential MUST conform to the VC Data Model 2.0 and use the `application/vc+sd-jwt` media type as defined in [W3C VC-JOSE-COSE](https://www.w3.org/TR/vc-jose-cose/).
+- `credential` - Required. The SD-JWT in compact serialization format. The credential MUST conform to the VC Data Model 2.0 and use the `application/w3c-vc-sd-jwt` media type as defined in [W3C VC-JOSE-COSE](https://www.w3.org/TR/vc-jose-cose/).
 
 It is up to the issuer to decide which claims are selectively disclosable. If `binding_required` was `true` in the offer, the issued SD-JWT MUST include a `cnf` (confirmation) claim bound to the holder's key as provided through the binding proof.
 
